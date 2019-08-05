@@ -6,7 +6,10 @@ import scipy.io as sio
 import os, time
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import cPickle
 
+#/Users/luxi/Desktop/ic/project/SNN_DVS_un/aer_recored
+readfold='SNN_DVS_un/aer_recored/'#Mul6_8_2/'
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #
@@ -90,11 +93,11 @@ class aedatObj(object):
 
         datafile = self.filename+'.aedat'
     
-        aerdatafh = open('aer/'+datafile, 'rb')
+        aerdatafh = open(readfold+datafile, 'rb')
         k = 0  # line number
         p = 0  # pointer, position on bytes
-        statinfo = os.stat('aer/'+datafile)
-        length = statinfo.st_size    
+        statinfo = os.stat(readfold+datafile)
+        length = statinfo.st_size  
         print ("file size", length)
         #######################################
         #print file size?
@@ -119,10 +122,10 @@ class aedatObj(object):
         header = str(lt)
 
         # variables to parse
-        timestamps = np.array([])
-        xaddr = np.array([])
-        yaddr = np.array([])
-        pol = np.array([])
+        timestamps = []#np.array([])
+        xaddr = []#np.array([])
+        yaddr = []#np.array([])
+        pol = []#np.array([])
         ######################
         #what is pol?-on-1 off-0 polar
     
@@ -147,11 +150,16 @@ class aedatObj(object):
                 print("x-> ", x_addr)
                 print("y-> ", y_addr)
                 print("pol->", a_pol)
-
+            '''
             timestamps = np.append(timestamps, ts)
             xaddr = np.append(xaddr, x_addr)
             yaddr = np.append(yaddr, y_addr)
             pol = np.append(pol, a_pol)
+            '''
+            timestamps.append(ts)
+            xaddr.append(x_addr)
+            yaddr.append(y_addr)
+            pol.append(a_pol)
             #np array catch
                   
             aerdatafh.seek(p)
@@ -170,8 +178,26 @@ class aedatObj(object):
             except:
                 print ("failed to print statistics")
 
-        return xaddr, yaddr, pol, timestamps, video_duration, header
+        #return xaddr, yaddr, pol, timestamps, video_duration, header
+        return (np.array(xaddr,dtype=np.int8), np.array(yaddr,dtype=np.int8), np.array(pol,dtype=np.int8), 
+                np.array(timestamps,dtype=np.int64), video_duration, header)
 
+
+    def save_object(self,save_filename=None):
+        savefold='SNN_DVS_un/aerpkl/'
+        if save_filename == None:
+            save_filename = self.filename
+        output=open(savefold+save_filename+'.pkl','wb')
+        cPickle.dump(self,output,-1)
+        output.close()
+
+    def save_object_r(self,save_filename=None):
+        savefold='SNN_DVS_un/aerpkl_r/'
+        if save_filename == None:
+            save_filename = self.filename
+        output=open(savefold+save_filename+'.pkl','wb')
+        cPickle.dump(self,output)
+        output.close()
 
     def save_to_mat(self, mat_filename=None): # mat_filename=self.filename[0:3] not possible --> set default arg to None and define inside
         """    
@@ -179,9 +205,10 @@ class aedatObj(object):
         --> all attributes are saved
         @param mat_filename - if None, save new .mat file with the same name as .aedat file
         """
+        savefold='SNN_DVS_un/aermat/'
         if mat_filename == None:
             mat_filename = self.filename
-        sio.savemat('aer/aermat/'+mat_filename, {'filename': mat_filename, 'x': self.x, 'y': self.y, 'pol': self.pol, 'ts': self.ts, \
+        sio.savemat(savefold+mat_filename, {'filename': mat_filename, 'x': self.x, 'y': self.y, 'pol': self.pol, 'ts': self.ts, \
         'video_t': self.video_t, 'header': self.header, 'dim': self.dim, 'max_events': self.max_events}) # save all attributes?
         # filename[0:3] --> name = 1-1.mat and not 1-1.aedat.mat
         # remember in python index starts at 0 and in [start:end], idx start is included but end is not
@@ -329,8 +356,19 @@ class aedatObj(object):
 
         return rtn
 
-AerTest=aedatObj(filename="mul6_mid_5.aedat")
-AerTest.save_to_mat()
-After_down=AerTest.downsample()
-After_filter=After_down.filter_noise()
-After_filter.save_to_mat()
+#AerTest=aedatObj(filename="mul6_fast_1.aedat")
+AerTest=aedatObj(filename="single3_1.aedat")
+#AerTest.save_to_mat()
+AerTest.save_object()
+'''
+After_filter=AerTest.filter_noise()
+After_down=After_filter.downsample()
+#After_down.save_to_mat()
+After_down.save_object()
+'''
+'''
+loadf=open('SNN_DVS_un/aerpkl/mul6_mid_6.pkl','rb')
+load_Aer=cPickle.load(loadf)
+load_Aer.save_to_mat('loadpkl')
+'''
+

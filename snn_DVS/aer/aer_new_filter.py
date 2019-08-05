@@ -6,10 +6,11 @@ import scipy.io as sio
 import os, time
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import cPickle
 
 #/Users/luxi/Desktop/ic/project/SNN_DVS_un/aer_recored
 readfold='SNN_DVS_un/aer_recored/Mul6_8_2/'
-savefold='SNN_DVS_un/aermat/'
+#savefold='SNN_DVS_un/aermat/'
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #
 #                               MY AEDAT OBJECT CLASS
@@ -173,7 +174,22 @@ class aedatObj(object):
                 print ("failed to print statistics")
 
         return xaddr, yaddr, pol, timestamps, video_duration, header
+ 
+    def save_object(self,save_filename=None):
+        savefold='SNN_DVS_un/aerpkl/'
+        if save_filename == None:
+            save_filename = self.filename
+        output=open(savefold+save_filename+'.pkl','wb')
+        cPickle.dump(self,output,-1)
+        output.close()
 
+    def save_object_r(self,save_filename=None):
+        savefold='SNN_DVS_un/aerpkl_r/'
+        if save_filename == None:
+            save_filename = self.filename
+        output=open(savefold+save_filename+'.pkl','wb')
+        cPickle.dump(self,output)
+        output.close()
 
     def save_to_mat(self, mat_filename=None): # mat_filename=self.filename[0:3] not possible --> set default arg to None and define inside
         """    
@@ -181,6 +197,7 @@ class aedatObj(object):
         --> all attributes are saved
         @param mat_filename - if None, save new .mat file with the same name as .aedat file
         """
+        savefold='SNN_DVS_un/aermat/'
         if mat_filename == None:
             mat_filename = self.filename
         sio.savemat(savefold+mat_filename, {'filename': mat_filename, 'x': self.x, 'y': self.y, 'pol': self.pol, 'ts': self.ts, \
@@ -215,7 +232,40 @@ class aedatObj(object):
     # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     #                           DATA PRE-PROCESSING
     # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+    def simple_process(self,new_dim=(32,32),pos_red=4,time_red=1000,th=7):
+        assert self.dim[0]%new_dim[0] is 0
+        assert self.dim[1]%new_dim[1] is 0
+        rtn = aedatObj()
+        rtn.filename = self.filename + '_sp_'+str(new_dim[0])
+        rtn.video_t = self.video_t
+        d_ts = np.floor(self.ts/time_red)
+        d_x = np.floor(self.x/pos_red)
+        d_y = np.floor(self.y/pos_red)
+        rtn_ts=[]
+        rtn_x=[]
+        rtn_y=[]
+        #d_pol = self.pol
+        p_ts=d_ts[0]
+        count_on=np.zeros((32,32),dtype=np.int8)
+        for i in range(len(d_ts)):
+            c_ts=d_ts[i]
+            if c_ts==d_ts:
+                if self.pol[i]==0:
+                    count_on[d_x[i],d_y[i]]+=1
+            else:
+                on_ind=np.where(count_on>=th)
+                for j in range(len(on_ind[0])):
+                    rtn_ts.append(p_ts)
+                    rtn_x.append(on_ind[0][i])
+                    rtn_y.append(on_ind[1][i])
+                p_ts=c_ts
+                count_on=np.zeros((32,32),dtype=np.int8)
+        rtn.pol=np.zeros((1,len(rtn_ts)))
+        rtn.ts=np.array(rtn_ts)
+        rtn.x=np.array(rtn_x)
+        rtn.y=np.array(rtn_y)
+        return rtn
+
     def downsample(self, new_dim=(32,32)):
         """    
         downsample aedatObj--> reduce resolution
@@ -332,9 +382,14 @@ class aedatObj(object):
                     str(windowSize) +', ' + str(windowSize) + ' \n Exposure time = ' + str(exposureTime_ms) + ' ms'
 
         return rtn
-
+'''
 AerTest=aedatObj(filename="mul6_mid_5.aedat")
 AerTest.save_to_mat()
 After_down=AerTest.downsample()
 After_filter=After_down.filter_noise()
 After_filter.save_to_mat()
+'''
+loadf=open('SNN_DVS_un/aerpkl/mul6_mid_6.pkl','rb')
+load_Aer=cPickle.load(loadf)
+a=load_Aer.simple_process()
+a.save_object()
