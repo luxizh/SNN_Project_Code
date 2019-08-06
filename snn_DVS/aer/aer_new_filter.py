@@ -9,7 +9,7 @@ from matplotlib import cm
 import cPickle
 
 #/Users/luxi/Desktop/ic/project/SNN_DVS_un/aer_recored
-readfold='SNN_DVS_un/aer_recored/Mul6_8_2/'
+readfold='SNN_DVS_un/aer_recored/'#Mul6_8_2/'
 #savefold='SNN_DVS_un/aermat/'
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #
@@ -43,6 +43,8 @@ class aedatObj(object):
     data_list = [] # list of data
 
     def __init__(self, filename=None, max_events=1e6):
+        self.max_events = max_events # always < 60 000 in my recordings
+        self.td = 0.000001  # timestep is 1us
         if filename == None:
             self.filename = 'new_obj_not_from_file' # could leave it to None
             self.x, self.y, self.pol, self.ts = np.array([]), np.array([]), np.array([]), np.array([])
@@ -53,7 +55,6 @@ class aedatObj(object):
             self.filename = filename[0:-6]
             self.x, self.y, self.pol, self.ts, self.video_t, self.header = self.load_data()
             self.dim = (128,128)
-        self.max_events = max_events # always < 60 000 in my recordings
         # obj/data in list not modified when real obj modified --> pointeur ?
         # only add obj created from file? 
         if len(self.ts) > 0: # don't add empty obj (ex temporary obj in fct)
@@ -74,7 +75,7 @@ class aedatObj(object):
       # constants
         aeLen = 8  # 1 AE event takes 8 bytes
         readMode = '>II'  # struct.unpack(), 2x ulong, 4B+4B
-        td = 0.000001  # timestep is 1us   
+           
     
         xmask = 0x00fe
         xshift = 1
@@ -122,10 +123,10 @@ class aedatObj(object):
         header = str(lt)
 
         # variables to parse
-        timestamps = np.array([])
-        xaddr = np.array([])
-        yaddr = np.array([])
-        pol = np.array([])
+        timestamps = []#np.array([])
+        xaddr = []#np.array([])
+        yaddr = []#np.array([])
+        pol = []#np.array([])
         ######################
         #what is pol?-on-1 off-0 polar
     
@@ -151,32 +152,33 @@ class aedatObj(object):
                 print("y-> ", y_addr)
                 print("pol->", a_pol)
 
-            timestamps = np.append(timestamps, ts)
-            xaddr = np.append(xaddr, x_addr)
-            yaddr = np.append(yaddr, y_addr)
-            pol = np.append(pol, a_pol)
+            timestamps.append(ts)
+            xaddr.append(x_addr)
+            yaddr.append(y_addr)
+            pol.append(a_pol)
             #np array catch
                   
             aerdatafh.seek(p)
             s = aerdatafh.read(aeLen)
             p += aeLen        
 
-        video_duration = (timestamps[-1] - timestamps[0]) * td#time duration
+        video_duration = (timestamps[-1] - timestamps[0]) * self.td#time duration
 
         if debug > 0:
             try:
                 print 'file name =', self.filename
-                print ("read %i (~ %.2fM) AE events, duration= %.2fs" % (len(timestamps), len(timestamps) / float(10 ** 6), (timestamps[-1] - timestamps[0]) * td))
+                print ("read %i (~ %.2fM) AE events, duration= %.2fs" % (len(timestamps), len(timestamps) / float(10 ** 6), (timestamps[-1] - timestamps[0]) * self.td))
                 n = 5
                 print ("showing first %i:" % (n))
                 print ("timestamps: %s \nX-addr: %s\nY-addr: %s\npolarity: %s" % (timestamps[0:n], xaddr[0:n], yaddr[0:n], pol[0:n]))
             except:
                 print ("failed to print statistics")
 
-        return xaddr, yaddr, pol, timestamps, video_duration, header
+        return (np.array(xaddr,dtype=np.int8), np.array(yaddr,dtype=np.int8), np.array(pol,dtype=np.int8), 
+                np.array(timestamps,dtype=np.int64), video_duration, header)
  
     def save_object(self,save_filename=None):
-        savefold='SNN_DVS_un/aerpkl/'
+        savefold='SNN_DVS_un/aerobj/'
         if save_filename == None:
             save_filename = self.filename
         output=open(savefold+save_filename+'.pkl','wb')
@@ -184,7 +186,7 @@ class aedatObj(object):
         output.close()
 
     def save_object_r(self,save_filename=None):
-        savefold='SNN_DVS_un/aerpkl_r/'
+        savefold='SNN_DVS_un/aerobj_r/'
         if save_filename == None:
             save_filename = self.filename
         output=open(savefold+save_filename+'.pkl','wb')
@@ -235,12 +237,10 @@ class aedatObj(object):
     def simple_process(self,new_dim=(32,32),pos_red=4,time_red=1000,th=7):
         assert self.dim[0]%new_dim[0] is 0
         assert self.dim[1]%new_dim[1] is 0
-        rtn = aedatObj()
-        rtn.filename = self.filename + '_sp_'+str(new_dim[0])
-        rtn.video_t = self.video_t
+
         d_ts = np.floor(self.ts/time_red)
-        d_x = np.floor(self.x/pos_red)
-        d_y = np.floor(self.y/pos_red)
+        d_x = np.floor(self.x/(self.dim[0] / new_dim[0]))
+        d_y = np.floor(self.y/(self.dim[1] / new_dim[1]))
         rtn_ts=[]
         rtn_x=[]
         rtn_y=[]
@@ -249,21 +249,32 @@ class aedatObj(object):
         count_on=np.zeros((32,32),dtype=np.int8)
         for i in range(len(d_ts)):
             c_ts=d_ts[i]
-            if c_ts==d_ts:
+            if c_ts==p_ts:
                 if self.pol[i]==0:
-                    count_on[d_x[i],d_y[i]]+=1
+                    count_on[int(d_x[i]),int(d_y[i])]+=1
             else:
                 on_ind=np.where(count_on>=th)
                 for j in range(len(on_ind[0])):
                     rtn_ts.append(p_ts)
-                    rtn_x.append(on_ind[0][i])
-                    rtn_y.append(on_ind[1][i])
+                    rtn_x.append(on_ind[0][j])
+                    rtn_y.append(on_ind[1][j])
                 p_ts=c_ts
                 count_on=np.zeros((32,32),dtype=np.int8)
-        rtn.pol=np.zeros((1,len(rtn_ts)))
-        rtn.ts=np.array(rtn_ts)
-        rtn.x=np.array(rtn_x)
-        rtn.y=np.array(rtn_y)
+        on_ind=np.where(count_on>=th)
+        for j in range(len(on_ind[0])):
+            rtn_ts.append(p_ts)
+            rtn_x.append(on_ind[0][j])
+            rtn_y.append(on_ind[1][j])
+
+        rtn = aedatObj()
+        rtn.dim=new_dim
+        rtn.td=self.td*time_red
+        rtn.filename = self.filename + '_sp_'+str(new_dim[0])
+        rtn.video_t = self.video_t
+        rtn.pol=np.zeros((1,len(rtn_ts)),dtype=np.int8)
+        rtn.ts=np.array(rtn_ts,dtype=np.int64)
+        rtn.x=np.array(rtn_x,dtype=np.int8)
+        rtn.y=np.array(rtn_y,dtype=np.int8)
         return rtn
 
     def downsample(self, new_dim=(32,32)):
@@ -372,16 +383,24 @@ class aedatObj(object):
         rtn = aedatObj()
 
         rtn.filename = self.filename + '_filtered'
-        rtn.ts = np.array(new_ts)
-        rtn.x = np.array(new_x)
-        rtn.y = np.array(new_y)
-        rtn.pol = np.array(new_pol)
+        rtn.ts = np.array(new_ts,dtype=np.int8)
+        rtn.x = np.array(new_x,dtype=np.int8)
+        rtn.y = np.array(new_y,dtype=np.int8)
+        rtn.pol = np.array(new_pol,dtype=np.int8)
         rtn.video_t = self.video_t
         rtn.dim = self.dim
         rtn.header = 'Filtered file ' + self.filename + ' \n Threshold = ' + str(threshold) + ' \n Window size = (' + \
                     str(windowSize) +', ' + str(windowSize) + ' \n Exposure time = ' + str(exposureTime_ms) + ' ms'
 
         return rtn
+
+#AerTest=aedatObj(filename="mul6_fast_1.aedat")
+AerRaw=aedatObj(filename="single3_1.aedat")
+#AerRAW.save_to_mat()
+AerRaw.save_object()
+AerSp=AerRaw.simple_process()
+AerSp.save_object()
+AerSp.save_to_mat()
 '''
 AerTest=aedatObj(filename="mul6_mid_5.aedat")
 AerTest.save_to_mat()
@@ -389,7 +408,11 @@ After_down=AerTest.downsample()
 After_filter=After_down.filter_noise()
 After_filter.save_to_mat()
 '''
+'''
 loadf=open('SNN_DVS_un/aerpkl/mul6_mid_6.pkl','rb')
 load_Aer=cPickle.load(loadf)
 a=load_Aer.simple_process()
 a.save_object()
+'''
+
+
