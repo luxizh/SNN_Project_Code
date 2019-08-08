@@ -239,14 +239,19 @@ class aedatObj(object):
         assert self.dim[1]%new_dim[1] is 0
 
         d_ts = np.floor(self.ts/time_red)
+        d_ts=d_ts-d_ts[0]+1
+        #start form 1
         d_x = np.floor(self.x/(self.dim[0] / new_dim[0]))
         d_y = np.floor(self.y/(self.dim[1] / new_dim[1]))
         rtn_ts=[]
         rtn_x=[]
         rtn_y=[]
         #d_pol = self.pol
+        spikes=[[] for i in range(new_dim[0]*new_dim[1])]
+
         p_ts=d_ts[0]
-        count_on=np.zeros((32,32),dtype=np.int8)
+        #start_ts=d_ts[0]
+        count_on=np.zeros(new_dim,dtype=np.int8)
         for i in range(len(d_ts)):
             c_ts=d_ts[i]
             if c_ts==p_ts:
@@ -258,13 +263,16 @@ class aedatObj(object):
                     rtn_ts.append(p_ts)
                     rtn_x.append(on_ind[0][j])
                     rtn_y.append(on_ind[1][j])
+                    #print(on_ind[0][j]*new_dim[0]+on_ind[1][j])
+                    (spikes[(on_ind[0][j]*new_dim[0]+on_ind[1][j])]).append(p_ts)
                 p_ts=c_ts
-                count_on=np.zeros((32,32),dtype=np.int8)
+                count_on=np.zeros(new_dim,dtype=np.int8)
         on_ind=np.where(count_on>=th)
         for j in range(len(on_ind[0])):
             rtn_ts.append(p_ts)
             rtn_x.append(on_ind[0][j])
             rtn_y.append(on_ind[1][j])
+            spikes[on_ind[0][j]*new_dim[0]+on_ind[1][j]].append(p_ts)
 
         rtn = aedatObj()
         rtn.dim=new_dim
@@ -275,7 +283,7 @@ class aedatObj(object):
         rtn.ts=np.array(rtn_ts,dtype=np.int64)
         rtn.x=np.array(rtn_x,dtype=np.int8)
         rtn.y=np.array(rtn_y,dtype=np.int8)
-        return rtn
+        return rtn,spikes
 
     def downsample(self, new_dim=(32,32)):
         """    
@@ -395,12 +403,20 @@ class aedatObj(object):
         return rtn
 
 #AerTest=aedatObj(filename="mul6_fast_1.aedat")
+'''
 AerRaw=aedatObj(filename="single3_1.aedat")
 #AerRAW.save_to_mat()
-AerRaw.save_object()
-AerSp=AerRaw.simple_process()
-AerSp.save_object()
-AerSp.save_to_mat()
+#AerRaw.save_object()
+AerSp,spikes=AerRaw.simple_process()
+#AerSp.save_object()
+#AerSp.save_to_mat()
+
+savefold='SNN_DVS_un/aerobj/'
+output=open(savefold+AerSp.filename+'_spikes.pkl','wb')
+cPickle.dump(spikes,output,-1)
+sio.savemat(savefold+AerSp.filename+'_spikes', {'spikes': spikes})
+output.close()
+'''
 '''
 AerTest=aedatObj(filename="mul6_mid_5.aedat")
 AerTest.save_to_mat()
@@ -414,5 +430,14 @@ load_Aer=cPickle.load(loadf)
 a=load_Aer.simple_process()
 a.save_object()
 '''
+'''
+a=[[]]*5
+a[0].append(3)
+print a
+b=[[],[],[],[]]
+b[0].append(3)
+print(b)
+'''
+
 
 
