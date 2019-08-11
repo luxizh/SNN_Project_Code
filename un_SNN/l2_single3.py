@@ -10,7 +10,7 @@ sys.path.append("/Users/luxi/Desktop/ic/project/SNN_DVS_un/SNN_Project_Code/snn_
 from aer_new_filter import aedatObj
 
 #trylabel=53
-trylabel=20
+trylabel=13
 #def parameters
 __delay__ = 0.250 # (ms) 
 tauPlus = 10#25 #20 # 15 # 16.8 from literature
@@ -36,13 +36,13 @@ v_co=1
 
 cell_params_lif = {'cm': 1,#70
                    'i_offset': 0.0,
-                   'tau_m': 30.0,#20
-                   'tau_refrac': 20.0,#2 more that t inhibit#10
+                   'tau_m': 20.0,#20
+                   'tau_refrac': 10.0,#2 more that t inhibit#10
                    'tau_syn_E': 2.0,#2
-                   'tau_syn_I': 5.0,#5
+                   'tau_syn_I': 10.0,#5
                    'v_reset': -70.0,
                    'v_rest': -65.0,
-                   'v_thresh': -50.0
+                   'v_thresh': -55.0
                    }
 
 def generate_data():
@@ -263,9 +263,38 @@ def test(spikeTimes, trained_weights,label):
     sim.end()
     return spikes
 
+#====================================================
+#========some visualization =========================
+#====================================================
+
+def plot_weight_reconstructions(neuron_index,weight):
+    plt.close('all')
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    '''
+    ax.set_yticks(range(len(yLabel)))
+    ax.set_yticklabels(yLabel, fontproperties=font)
+    ax.set_xticks(range(len(xLabel)))
+    ax.set_xticklabels(xLabel)
+    '''
+    #weight=weight.reshape()
+    #作图并选择热图的颜色填充风格，这里选择hot
+    im = ax.imshow(weight, cmap=plt.cm.gray_r,origin='lower')
+    #增加右侧的颜色刻度条
+    plt.colorbar(im)
+    #增加标题
+    plt.title("reconstrucion of neuron"+str(neuron_index))
+    #show
+    
+    plt.savefig('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_neuron.png')
+    plt.show()
+    plt.close('all')
+    pass
+    return fig
+
 
 #==============main================
-
+'''
 readfold='SNN_DVS_un/aer_recored/'
 AerRaw=aedatObj(filename="single3_2.aedat")
 #AerRAW.save_to_mat()
@@ -281,14 +310,21 @@ cPickle.dump(spikes,output,-1)
 output.close()
 
 '''
+'''
 loadfold='SNN_DVS_un/aerobj/'
 in_f=open(loadfold+'single3_1_sp_32_spikes.pkl','rb')
 spikes=cPickle.load(in_f)
 in_f.close()
-'''
+
 
 weight_list=None
 weight_list=train(spikeTimes=spikes,untrained_weights=weight_list)
+np.save("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy",weight_list)
+'''
+weight_list=np.load("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy")
+neuron_ind=4
+weight_re=weight_list.reshape(input_size,-1)[:,neuron_ind]
+fig=plot_weight_reconstructions(neuron_ind,weight_re.reshape((input_len,-1),order='F'))
 #for i in range(10):
 #    spikeTimes=generate_data(1)
 
