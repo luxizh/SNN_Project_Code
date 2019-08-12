@@ -11,15 +11,15 @@ sys.path.append("/Users/luxi/Desktop/ic/project/SNN_DVS_un/SNN_Project_Code/snn_
 from aer_new_filter import aedatObj
 
 #trylabel=53
-trylabel=13
+trylabel=19
 #def parameters
-__delay__ = 0.250 # (ms) 
-tauPlus = 10#25 #20 # 15 # 16.8 from literature
-tauMinus = 20# #20 # 30 # 33.7 from literature
-aPlus = 0.100  #tum 0.016 #9 #3 #0.5 # 0.03 from literature
-aMinus = 0.0500 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
+__delay__ = 1#0.250 # (ms) 
+tauPlus = 30#25 #20 # 15 # 16.8 from literature
+tauMinus = 15# #20 # 30 # 33.7 from literature
+aPlus = 0.200  #tum 0.016 #9 #3 #0.5 # 0.03 from literature
+aMinus = 0.100 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
 wMax = 1.5 #1 # G: 0.15 1
-wMaxInit = 0.4#0.1#0.100
+wMaxInit = 0.5#0.1#0.100
 wMin = 0
 nbIter = 5
 testWeightFactor = 1#0.05177
@@ -38,7 +38,7 @@ v_co=1
 cell_params_lif = {'cm': 1,#70
                    'i_offset': 0.0,
                    'tau_m': 20.0,#20
-                   'tau_refrac': 10.0,#2 more that t inhibit#10
+                   'tau_refrac': 20.0,#2 more that t inhibit#10
                    'tau_syn_E': 2.0,#2
                    'tau_syn_I': 10.0,#5
                    'v_reset': -70.0,
@@ -144,7 +144,7 @@ def train(spikeTimes,untrained_weights=None):
     #def populations
     layer1=sim.Population(input_size,sim.SpikeSourceArray, {'spike_times': spikeTimes},label='inputspikes')
     layer2=sim.Population(output_size,sim.IF_curr_exp,cellparams=cell_params_lif,label='outputspikes')
-    supsignal=sim.Population(output_size,sim.SpikeSourceArray, {'spike_times': labelSpikes},label='supersignal')
+    #supsignal=sim.Population(output_size,sim.SpikeSourceArray, {'spike_times': labelSpikes},label='supersignal')
 
     #def learning rule
     stdp = sim.STDPMechanism(
@@ -169,7 +169,7 @@ def train(spikeTimes,untrained_weights=None):
     layer1.record(['spikes'])
 
     layer2.record(['v','spikes'])
-    supsignal.record(['spikes'])
+    #supsignal.record(['spikes'])
     sim.run(runTime)
 
     print("Weights:{}".format(stdp_proj.get('weight', 'list')))
@@ -178,8 +178,8 @@ def train(spikeTimes,untrained_weights=None):
     neo = layer2.get_data(["spikes", "v"])
     spikes = neo.segments[0].spiketrains
     v = neo.segments[0].filter(name='v')[0]
-    neostim = supsignal.get_data(["spikes"])
-    spikestim = neostim.segments[0].spiketrains
+    #neostim = supsignal.get_data(["spikes"])
+    #spikestim = neostim.segments[0].spiketrains
     neoinput= layer1.get_data(["spikes"])
     spikesinput = neoinput.segments[0].spiketrains
 
@@ -321,12 +321,12 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
 
 #==============main================
 '''
-readfold='SNN_DVS_un/aer_recored/'
-AerRaw=aedatObj(filename="single3_2.aedat")
+readfold='SNN_DVS_un/aer_recored/record_8_12/'
+AerRaw=aedatObj(filename="single3_4.aedat")
 #AerRAW.save_to_mat()
 #AerRaw.save_object()
-AerSp,spikes=AerRaw.simple_process(time_red=10000)
-#AerSp.save_object()
+AerSp,spikes=AerRaw.simple_process(time_red=1000)
+AerSp.save_object()
 #AerSp.save_to_mat()
 
 savefold='SNN_DVS_un/aerobj/'
@@ -334,11 +334,10 @@ output=open(savefold+AerSp.filename+'_spikes.pkl','wb')
 cPickle.dump(spikes,output,-1)
 #sio.savemat(savefold+AerSp.filename+'_spikes', {'spikes': spikes})
 output.close()
+'''
 
-'''
-'''
 loadfold='SNN_DVS_un/aerobj/'
-in_f=open(loadfold+'single3_1_sp_32_spikes.pkl','rb')
+in_f=open(loadfold+'single3_4_sp_32_spikes.pkl','rb')
 spikes=cPickle.load(in_f)
 in_f.close()
 
@@ -346,7 +345,7 @@ in_f.close()
 weight_list=None
 weight_list=train(spikeTimes=spikes,untrained_weights=weight_list)
 np.save("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy",weight_list)
-'''
+
 weight_list=np.load("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy")
 neuron_ind=4
 weight_re=weight_list.reshape(input_size,-1)

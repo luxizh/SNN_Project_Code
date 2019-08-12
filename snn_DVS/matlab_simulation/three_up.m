@@ -4,6 +4,8 @@ function three_up(src, evt, stop)
     count=[0 0 0];
     while(strcmp(stop.Label,'Stop'))
         lane=unidrnd(3);
+        tp=rand(1);
+        pause(tp/10)
         car_pass(src,evt,lane);
         X=(lane-1)*40;% lane=1 2 3
         box=patch([X+5 X+35 X+35 X+5], [160 160 120 120], 'w');

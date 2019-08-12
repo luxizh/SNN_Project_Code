@@ -12,6 +12,7 @@ stop=uimenu(f,'Label','Stop','Callback',{@stop_func},...
 box=uimenu(menu,'Label','three_lanes up', 'Callback',{@three_up,stop});
 box.Accelerator = '0';
 box1=uimenu(menu,'Label','three_lanes_mul up', 'Callback',{@three_up_mul,stop}); 
+box1.Accelerator = '1';
 box2=uimenu(menu,'Label','six_lanes_mul up', 'Callback',{@six_up_mul,stop});
 box3=uimenu(menu,'Label','six_lanes_mul up', 'Callback',{@six_up_mul_1,stop}); 
 box3.Accelerator = '3';

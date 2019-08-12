@@ -3,7 +3,7 @@ function three_up_mul(src, evt, stop)
 %     open(vidObj);
     X=[];
     Y=[];
-    lane=unidrnd(20,[1,3])+10;
+    lane=unidrnd(50,[1,3])+10;%20 10
     count=zeros(1,3);
     X=[0 0 0 0];
     Y=[0 0 0 0];
@@ -15,7 +15,7 @@ function three_up_mul(src, evt, stop)
         for i=1:3
             if lane(i)==0
                 count(i)=count(i)+1;
-                lane(i)=unidrnd(20)+10;
+                lane(i)=unidrnd(50)+15;%20 10
                 X=[(i-1)*40+5 (i-1)*40+35 (i-1)*40+35 (i-1)*40+5;X];
                 Y=[160 160 120 120;Y];
             end
