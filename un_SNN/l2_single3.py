@@ -1,5 +1,6 @@
 import pyNN.spiNNaker as sim
 import numpy as np
+import math
 import random
 from pyNN.random import NumpyRNG, RandomDistribution
 import pyNN.utility.plotting as pplt
@@ -267,7 +268,7 @@ def test(spikeTimes, trained_weights,label):
 #========some visualization =========================
 #====================================================
 
-def plot_weight_reconstructions(neuron_index,weight):
+def plot_weight_reconstruction(neuron_index,weight):
     plt.close('all')
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -291,6 +292,31 @@ def plot_weight_reconstructions(neuron_index,weight):
     plt.close('all')
     pass
     return fig
+
+def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
+    plt.close('all')
+    sub_size=int(math.ceil(math.sqrt(neurons)))
+    fig,ax= plt.subplots(sub_size,sub_size)
+    ax=ax.flatten()
+    plt.subplots_adjust(hspace=0.3,wspace=0.1)
+
+    
+    #plt.subplots_adjust(left=None, bottom=None, right=None, top=None,wspace=None)
+    for i in range(neurons):
+        #ax = fig.add_subplot(sub_size,sub_size,i+1)
+        ax[i].set_title('neuron '+str(i),fontsize=10,fontweight='bold')
+        #ax[i].set_xticklabels([0,31])
+        ax[i].set_yticks(range(0,input_len,input_len-1))
+        ax[i].set_xticks(range(0,input_class,input_class-1))
+        ax[i].tick_params(labelsize=8)
+        im = ax[i].imshow(weight[:,i].reshape((input_len,-1),order='F'), cmap=plt.cm.gray,vmax=wMax,origin='lower')
+    fig.colorbar(im,ax=ax[:])
+    fig.suptitle('Reconstrucions',fontweight='bold')
+    fig.savefig('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_neurons.png')
+    plt.show()
+    plt.close('all')
+    return fig 
+    
 
 
 #==============main================
@@ -323,8 +349,9 @@ np.save("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy",weight_list)
 '''
 weight_list=np.load("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy")
 neuron_ind=4
-weight_re=weight_list.reshape(input_size,-1)[:,neuron_ind]
-fig=plot_weight_reconstructions(neuron_ind,weight_re.reshape((input_len,-1),order='F'))
+weight_re=weight_list.reshape(input_size,-1)
+#plot_weight_reconstruction(neuron_ind,(weight_re[:,neuron_ind]).reshape((input_len,-1),order='F'))
+plot_all_weight_reconstructions(weight_re,output_size,input_len,input_class,wMax)
 #for i in range(10):
 #    spikeTimes=generate_data(1)
 
