@@ -179,7 +179,7 @@ class aedatObj(object):
                 np.array(timestamps,dtype=np.int64), video_duration, header)
  
     def save_object(self,save_filename=None):
-        savefold='SNN_DVS_un/aerobj/'
+        savefold='SNN_DVS_un/aerobj_6/'
         if save_filename == None:
             save_filename = self.filename
         output=open(savefold+save_filename+'.pkl','wb')
@@ -235,7 +235,7 @@ class aedatObj(object):
     # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     #                           DATA PRE-PROCESSING
     # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    def simple_process(self,new_dim=(32,32),pos_red=4,time_red=1000,th=7):
+    def simple_process(self,new_dim=(32,32),pos_red=4,time_red=1000,th=6):
         assert self.dim[0]%new_dim[0] is 0
         assert self.dim[1]%new_dim[1] is 0
 

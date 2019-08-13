@@ -11,15 +11,15 @@ sys.path.append("/Users/luxi/Desktop/ic/project/SNN_DVS_un/SNN_Project_Code/snn_
 from aer_new_filter import aedatObj
 
 #trylabel=53
-trylabel=19
+trylabel=35
 #def parameters
 __delay__ = 1#0.250 # (ms) 
-tauPlus = 30#25 #20 # 15 # 16.8 from literature
+tauPlus = 25#25 #20 # 15 # 16.8 from literature
 tauMinus = 15# #20 # 30 # 33.7 from literature
 aPlus = 0.200  #tum 0.016 #9 #3 #0.5 # 0.03 from literature
 aMinus = 0.100 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
 wMax = 1.5 #1 # G: 0.15 1
-wMaxInit = 0.5#0.1#0.100
+wMaxInit = 0.4#0.5#0.1#0.100
 wMin = 0
 nbIter = 5
 testWeightFactor = 1#0.05177
@@ -189,8 +189,8 @@ def train(spikeTimes,untrained_weights=None):
     pplt.Panel(spikesinput,xticks=True, yticks=True, markersize=2, xlim=(0,runTime),xlabel='(b) Spikes of Input Layer'),
     #pplt.Panel(spikestim, xticks=True, yticks=True, markersize=2, xlim=(0,runTime),xlabel='(c) Spikes of Supervised Layer'),
     pplt.Panel(spikes, xticks=True, xlabel="(c) Spikes of Output Layer\nTime (ms)", yticks=True, markersize=2, xlim=(0,runTime)),
-    title="Single_car Training with noise",
-    annotations="Single_car Training with noise"
+    title="Three lanes Training",
+    annotations="Three lanes Training"
                 ).save('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_training.png')
     #plt.hist(weight_list[1], bins=100)
     
@@ -206,7 +206,7 @@ def train(spikeTimes,untrained_weights=None):
     return weight_list[1]
 
 
-def test(spikeTimes, trained_weights,label):
+def test(spikeTimes,trained_weights):
 
     #spikeTimes = extractSpikes(sample)
     runTime = int(max(max(spikeTimes)))+100
@@ -238,25 +238,29 @@ def test(spikeTimes, trained_weights,label):
             #k += 1
 
     prepost_proj = sim.Projection(pre_pop, post_pop, sim.FromListConnector(connections), synapse_type=sim.StaticSynapse(), receptor_type='excitatory') # no more learning !!
-    #inhib_proj = sim.Projection(post_pop, post_pop, sim.AllToAllConnector(), synapse_type=sim.StaticSynapse(weight=inhibWeight, delay=__delay__), receptor_type='inhibitory')
+    inhib_proj = sim.Projection(post_pop, post_pop, sim.AllToAllConnector(), synapse_type=sim.StaticSynapse(weight=inhibWeight, delay=__delay__), receptor_type='inhibitory')
     # no more lateral inhib
-
+    pre_pop.record(['spikes'])
     post_pop.record(['v', 'spikes'])
     sim.run(runTime)
 
     neo = post_pop.get_data(['v', 'spikes'])
     spikes = neo.segments[0].spiketrains
     v = neo.segments[0].filter(name='v')[0]
-    f1=pplt.Figure(
+    neoinput= pre_pop.get_data(["spikes"])
+    spikesinput = neoinput.segments[0].spiketrains
+    
+    plt.close('all')
+    pplt.Figure(
     # plot voltage 
-    pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0, runTime+100)),
+    pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0, runTime+100),xlabel='(a) Membrane Potential of Output Layer'),
     # raster plot
-    pplt.Panel(spikes, xlabel="Time (ms)", xticks=True, yticks=True, markersize=2, xlim=(0, runTime+100)),
-    title='Test with label ' + str(label),
-    annotations='Test with label ' + str(label)
-                )
-    f1.save('plot1/'+str(trylabel)+str(label)+'_test.png')
-    f1.fig.texts=[]
+    pplt.Panel(spikesinput,xticks=True, yticks=True, markersize=2, xlim=(0,runTime),xlabel='(b) Spikes of Input Layer'),
+    pplt.Panel(spikes, xlabel="(c) Spikes of Output Layer\nTime (ms)", xticks=True, yticks=True, markersize=2, xlim=(0, runTime+100)),
+    title='Three lanes Test'#,
+    #annotations='T'
+                ).save('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_test2.png')
+    #f1.fig.texts=[]
     print("Weights:{}".format(prepost_proj.get('weight', 'list')))
 
     weight_list = [prepost_proj.get('weight', 'list'), prepost_proj.get('weight', format='list', with_address=False)]
@@ -322,22 +326,23 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
 #==============main================
 '''
 readfold='SNN_DVS_un/aer_recored/record_8_12/'
-AerRaw=aedatObj(filename="single3_4.aedat")
+AerRaw=aedatObj(filename="single3_5.aedat")
 #AerRAW.save_to_mat()
 #AerRaw.save_object()
 AerSp,spikes=AerRaw.simple_process(time_red=1000)
 AerSp.save_object()
 #AerSp.save_to_mat()
 
-savefold='SNN_DVS_un/aerobj/'
+savefold='SNN_DVS_un/aerobj_6/'
 output=open(savefold+AerSp.filename+'_spikes.pkl','wb')
 cPickle.dump(spikes,output,-1)
 #sio.savemat(savefold+AerSp.filename+'_spikes', {'spikes': spikes})
 output.close()
+
 '''
 
-loadfold='SNN_DVS_un/aerobj/'
-in_f=open(loadfold+'single3_4_sp_32_spikes.pkl','rb')
+loadfold='SNN_DVS_un/aerobj_6/'
+in_f=open(loadfold+'single3_5_sp_32_spikes.pkl','rb')
 spikes=cPickle.load(in_f)
 in_f.close()
 
@@ -356,4 +361,13 @@ plot_all_weight_reconstructions(weight_re,output_size,input_len,input_class,wMax
 
 #np.save("class_result/noiseweight"+str(trylabel)+".npy",weight_list)
 
+'''
+loadfold='SNN_DVS_un/aerobj/'
+in_f=open(loadfold+'single3_6_sp_32_spikes.pkl','rb')
+testspikes=cPickle.load(in_f)
+in_f.close()
 
+weight_list=np.load("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy")
+test(testspikes,weight_list)
+
+'''
