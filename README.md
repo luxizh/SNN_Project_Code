@@ -17,7 +17,9 @@ continue 19
 3 th=6
 32 3_4 0.4 1.5
 33/34 3_4 25 more stable
-35 3_5
+35 3_5 seem that lane 1 more weak
+36 3_5
+40 3_10
 
 
 

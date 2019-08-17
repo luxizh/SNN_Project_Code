@@ -10,7 +10,7 @@ import cPickle
 
 #/Users/luxi/Desktop/ic/project/SNN_DVS_un/aer_recored
 readfold='SNN_DVS_un/aer_recored/'#Mul6_8_2/'
-readfold='SNN_DVS_un/aer_recored/record_8_12/'
+readfold='SNN_DVS_un/aer_recored/record_8_16/'
 #savefold='SNN_DVS_un/aermat/'
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #

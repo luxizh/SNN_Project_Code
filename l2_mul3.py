@@ -11,7 +11,7 @@ sys.path.append("/Users/luxi/Desktop/ic/project/SNN_DVS_un/SNN_Project_Code/snn_
 from aer_new_filter import aedatObj
 
 #trylabel=53
-trylabel=36
+trylabel=1
 #def parameters
 __delay__ = 1#0.250 # (ms) 
 tauPlus = 25#25 #20 # 15 # 16.8 from literature
@@ -30,7 +30,7 @@ input_len=32#y 30
 input_class=32#x 3
 input_size=input_len*input_class
 output_size=9
-inhibWeight = -3
+inhibWeight = -1
 stimWeight = 20
 
 v_co=1
@@ -138,7 +138,7 @@ def train(spikeTimes,untrained_weights=None):
     for n_pre in range(input_size): # len(untrained_weights) = input_size
         for n_post in range(output_size): # len(untrained_weight[0]) = output_size; 0 or any n_pre
             connections.append((n_pre, n_post, training_weights[n_pre][n_post], __delay__)) #index
-    runTime = int(max(max(spikeTimes)))+100
+    runTime = int(max(max(spikeTimes/2)))+100
     #####################
     sim.setup(timestep=1)
     #def populations
@@ -191,7 +191,7 @@ def train(spikeTimes,untrained_weights=None):
     pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0,runTime),xlabel='(c) Membrane Potential of Output Layer\nTime (ms)'),
     title="Three lanes Training",
     annotations="Three lanes Training"
-                ).save('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_training.png')
+                ).save('SNN_DVS_un/plot_for_mul3/'+str(trylabel)+'_training.png')
     #plt.hist(weight_list[1], bins=100)
     
     plt.close('all')
@@ -260,7 +260,7 @@ def test(spikeTimes,trained_weights):
     pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0, runTime+100),xlabel='(c) Membrane Potential of Output Layer\nTime (ms)'),
     title='Three lanes Test'#,
     #annotations='T'
-                ).save('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_test13.png')
+                ).save('SNN_DVS_un/plot_for_mul3/'+str(trylabel)+'_test1.png')
     #f1.fig.texts=[]
     print("Weights:{}".format(prepost_proj.get('weight', 'list')))
 
@@ -292,7 +292,7 @@ def plot_weight_reconstruction(neuron_index,weight):
     plt.title("reconstrucion of neuron"+str(neuron_index))
     #show
     
-    plt.savefig('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_neuron.png')
+    plt.savefig('SNN_DVS_un/plot_for_mul3/'+str(trylabel)+'_neuron.png')
     plt.show()
     plt.close('all')
     pass
@@ -317,7 +317,7 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
         im = ax[i].imshow(weight[:,i].reshape((input_len,-1),order='F'), cmap=plt.cm.gray,vmax=wMax,origin='lower')
     fig.colorbar(im,ax=ax[:])
     fig.suptitle('Reconstrucions',fontweight='bold')
-    fig.savefig('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_neurons.png')
+    fig.savefig('SNN_DVS_un/plot_for_mul3/'+str(trylabel)+'_neurons.png')
     plt.show()
     plt.close('all')
     return fig 
@@ -326,8 +326,8 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
 
 #==============main================
 '''
-readfold='SNN_DVS_un/aer_recored/record_8_16/'
-AerRaw=aedatObj(filename="single3_13.aedat")
+readfold='SNN_DVS_un/aer_recored/record_8_12/'
+AerRaw=aedatObj(filename="mul3_4.aedat")
 #AerRAW.save_to_mat()
 #AerRaw.save_object()
 AerSp,spikes=AerRaw.simple_process(time_red=1000)
@@ -341,18 +341,18 @@ cPickle.dump(spikes,output,-1)
 output.close()
 
 '''
-'''
+
 loadfold='SNN_DVS_un/aerobj_6/'
-in_f=open(loadfold+'single3_11_sp_32_spikes.pkl','rb')
+in_f=open(loadfold+'mul3_2_sp_32_spikes.pkl','rb')
 spikes=cPickle.load(in_f)
 in_f.close()
 
 
 weight_list=None
 weight_list=train(spikeTimes=spikes,untrained_weights=weight_list)
-np.save("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy",weight_list)
+np.save("SNN_DVS_un/weight/l2_weight_mul3/"+str(trylabel)+".npy",weight_list)
 
-weight_list=np.load("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy")
+weight_list=np.load("SNN_DVS_un/weight/l2_weight_mul3/"+str(trylabel)+".npy")
 neuron_ind=4
 weight_re=weight_list.reshape(input_size,-1)
 #plot_weight_reconstruction(neuron_ind,(weight_re[:,neuron_ind]).reshape((input_len,-1),order='F'))
@@ -362,8 +362,9 @@ plot_all_weight_reconstructions(weight_re,output_size,input_len,input_class,wMax
 
 #np.save("class_result/noiseweight"+str(trylabel)+".npy",weight_list)
 
+
 '''
-loadfold='SNN_DVS_un/aerobj_6/'
+loadfold='SNN_DVS_un/aerobj/'
 in_f=open(loadfold+'single3_3_sp_32_spikes.pkl','rb')
 testspikes=cPickle.load(in_f)
 in_f.close()
@@ -372,3 +373,4 @@ weight_list=np.load("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy")
 test(testspikes,weight_list)
 
 
+'''
