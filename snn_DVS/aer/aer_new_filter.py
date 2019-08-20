@@ -10,7 +10,7 @@ import cPickle
 
 #/Users/luxi/Desktop/ic/project/SNN_DVS_un/aer_recored
 readfold='SNN_DVS_un/aer_recored/'#Mul6_8_2/'
-readfold='SNN_DVS_un/aer_recored/record_8_16/'
+readfold='SNN_DVS_un/aer_recored/record_8_18/'
 #savefold='SNN_DVS_un/aermat/'
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #
@@ -179,7 +179,7 @@ class aedatObj(object):
                 np.array(timestamps,dtype=np.int64), video_duration, header)
  
     def save_object(self,save_filename=None):
-        savefold='SNN_DVS_un/aerobj_6/'
+        savefold='SNN_DVS_un/aerobj/'
         if save_filename == None:
             save_filename = self.filename
         output=open(savefold+save_filename+'.pkl','wb')
@@ -235,7 +235,7 @@ class aedatObj(object):
     # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     #                           DATA PRE-PROCESSING
     # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    def simple_process(self,new_dim=(32,32),pos_red=4,time_red=1000,th=6):
+    def simple_process(self,new_dim=(32,32),pos_red=4,time_red=1000,th=9):
         assert self.dim[0]%new_dim[0] is 0
         assert self.dim[1]%new_dim[1] is 0
 

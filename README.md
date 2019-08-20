@@ -20,6 +20,36 @@ continue 19
 35 3_5 seem that lane 1 more weak
 36 3_5
 40 3_10
+50 3_17 th=7
+51 3_16 th=6
+60 sp 10
+70 
+71
+tauPlus = 40
+tauMinus = 30
+aPlus = 0.02
+aMinus = 0.010 
+wMax = 0.4
+wMaxInit = 0.07
+
+'cm': 1,
+'i_offset': 0.0,
+'tau_m': 20.0,
+'tau_refrac': 20.0,
+'tau_syn_E': 2.0,
+'tau_syn_I': 10.0,
+'v_reset': -70.0,
+'v_rest': -65.0,
+'v_thresh': -50.0
+72 73
+aPlus = 0.024
+wMaxInit = 0.08
+74
+tauPlus = 30
+75
+
+
+
 
 
 

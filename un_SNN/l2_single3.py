@@ -11,15 +11,15 @@ sys.path.append("/Users/luxi/Desktop/ic/project/SNN_DVS_un/SNN_Project_Code/snn_
 from aer_new_filter import aedatObj
 
 #trylabel=53
-trylabel=36
+trylabel=75
 #def parameters
 __delay__ = 1#0.250 # (ms) 
-tauPlus = 25#25 #20 # 15 # 16.8 from literature
-tauMinus = 15# #20 # 30 # 33.7 from literature
-aPlus = 0.200  #tum 0.016 #9 #3 #0.5 # 0.03 from literature
-aMinus = 0.100 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
-wMax = 1.5 #1 # G: 0.15 1
-wMaxInit = 0.4#0.5#0.1#0.100
+tauPlus = 40#25 #20 # 15 # 16.8 from literature
+tauMinus = 20# #20 # 30 # 33.7 from literature
+aPlus = 0.024  #tum 0.016 #9 #3 #0.5 # 0.03 from literature
+aMinus = 0.012 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
+wMax = 0.4#1 #1 # G: 0.15 1
+wMaxInit = 0.08#0.5#0.1#0.100
 wMin = 0
 nbIter = 5
 testWeightFactor = 1#0.05177
@@ -30,7 +30,7 @@ input_len=32#y 30
 input_class=32#x 3
 input_size=input_len*input_class
 output_size=9
-inhibWeight = -3
+inhibWeight = -1
 stimWeight = 20
 
 v_co=1
@@ -43,7 +43,7 @@ cell_params_lif = {'cm': 1,#70
                    'tau_syn_I': 10.0,#5
                    'v_reset': -70.0,
                    'v_rest': -65.0,
-                   'v_thresh': -55.0
+                   'v_thresh': -50.0
                    }
 
 def generate_data():
@@ -234,11 +234,12 @@ def test(spikeTimes,trained_weights):
     for n_pre in range(input_size): # len(untrained_weights) = input_size
         for n_post in range(output_size): # len(untrained_weight[0]) = output_size; 0 or any n_pre
             #connections.append((n_pre, n_post, weigths[n_pre][n_post]*(wMax), __delay__))
-            connections.append((n_pre, n_post, weigths[n_pre][n_post]*(wMax)/max(trained_weights), __delay__)) #
+            #connections.append((n_pre, n_post, weigths[n_pre][n_post]*(wMax)/max(trained_weights), __delay__)) 
+            connections.append((n_pre, n_post, weigths[n_pre][n_post]*(1)/max(trained_weights), __delay__))#
             #k += 1
 
     prepost_proj = sim.Projection(pre_pop, post_pop, sim.FromListConnector(connections), synapse_type=sim.StaticSynapse(), receptor_type='excitatory') # no more learning !!
-    inhib_proj = sim.Projection(post_pop, post_pop, sim.AllToAllConnector(), synapse_type=sim.StaticSynapse(weight=inhibWeight, delay=__delay__), receptor_type='inhibitory')
+    #inhib_proj = sim.Projection(post_pop, post_pop, sim.AllToAllConnector(), synapse_type=sim.StaticSynapse(weight=inhibWeight, delay=__delay__), receptor_type='inhibitory')
     # no more lateral inhib
     pre_pop.record(['spikes'])
     post_pop.record(['v', 'spikes'])
@@ -326,24 +327,24 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
 
 #==============main================
 '''
-readfold='SNN_DVS_un/aer_recored/record_8_16/'
-AerRaw=aedatObj(filename="single3_13.aedat")
+readfold='SNN_DVS_un/aer_recored/record_8_18/'
+AerRaw=aedatObj(filename="single3_26.aedat")
 #AerRAW.save_to_mat()
 #AerRaw.save_object()
 AerSp,spikes=AerRaw.simple_process(time_red=1000)
 AerSp.save_object()
 #AerSp.save_to_mat()
 
-savefold='SNN_DVS_un/aerobj_6/'
+savefold='SNN_DVS_un/aerobj/'
 output=open(savefold+AerSp.filename+'_spikes.pkl','wb')
 cPickle.dump(spikes,output,-1)
 #sio.savemat(savefold+AerSp.filename+'_spikes', {'spikes': spikes})
 output.close()
+'''
 
 '''
-'''
-loadfold='SNN_DVS_un/aerobj_6/'
-in_f=open(loadfold+'single3_11_sp_32_spikes.pkl','rb')
+loadfold='SNN_DVS_un/aerobj/'
+in_f=open(loadfold+'single3_20_sp_32_spikes.pkl','rb')
 spikes=cPickle.load(in_f)
 in_f.close()
 
@@ -363,8 +364,9 @@ plot_all_weight_reconstructions(weight_re,output_size,input_len,input_class,wMax
 #np.save("class_result/noiseweight"+str(trylabel)+".npy",weight_list)
 
 '''
-loadfold='SNN_DVS_un/aerobj_6/'
-in_f=open(loadfold+'single3_3_sp_32_spikes.pkl','rb')
+
+loadfold='SNN_DVS_un/aerobj/'
+in_f=open(loadfold+'single3_26_sp_32_spikes.pkl','rb')
 testspikes=cPickle.load(in_f)
 in_f.close()
 

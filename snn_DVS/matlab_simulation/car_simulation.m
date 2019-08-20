@@ -5,7 +5,7 @@ f = figure('MenuBar','None');
 menu = uimenu(f,'Label','Start simulation');
 stop=uimenu(f,'Label','Stop','Callback',{@stop_func},... 
            'Separator','on','Accelerator','X');
-%stop.Accelerator = 'P';
+%stop.Accelerator = '4';
 %quit=uimenu(f,'Label','Quit','Callback',{@exit_func},... 
 %           'Separator','on','Accelerator','Q');
 %arrows=uimenu(menu,'Label','Arrows', 'Callback',{@arrow_func, stop}); 

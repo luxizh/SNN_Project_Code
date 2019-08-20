@@ -3,7 +3,7 @@ function six_up_mul_1(src, evt, stop)
 %     open(vidObj);
     X=[];
     Y=[];
-    lane=unidrnd(60,[1,6])+8;%24，6
+    lane=unidrnd(80,[1,6])+8;%24，6
     count=zeros(1,6);
     X=[0 0 0 0];
     Y=[0 0 0 0];
@@ -15,7 +15,7 @@ function six_up_mul_1(src, evt, stop)
         for i=1:6
             if lane(i)==0
                 count(i)=count(i)+1;
-                lane(i)=unidrnd(60)+8;%24 6
+                lane(i)=unidrnd(80)+8;% 60 8%24 6
                 X=[(i-1)*20+2 (i-1)*20+18 (i-1)*20+18 (i-1)*20+2;X];
                 Y=[144 144 120 120;Y];
             end
