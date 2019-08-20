@@ -47,6 +47,92 @@ wMaxInit = 0.08
 74
 tauPlus = 30
 75
+0.24 0.12
+inhi -1
+
+ cancel inhibtory at test max 1.0
+
+sp different speed
+th=7
+0
+trylabel=0
+__delay__ = 1
+tauPlus = 40
+tauMinus = 20
+aPlus = 0.024  
+aMinus = 0.012 
+wMax = 0.4
+wMaxInit = 0.08
+wMin = 0
+inhibWeight = -1
+
+11
+0.6 0.3
+0.4 1
+
+
+13 0.6 0.3 
+0.1 0.05
+14 
+
+trylabel=14
+#def parameters
+__delay__ = 1#0.250 # (ms) 
+tauPlus = 100#25 #20 # 15 # 16.8 from literature
+tauMinus = 300# #20 # 30 # 33.7 from literature
+aPlus = 0.1 #tum 0.016 #9 #3 #0.5 # 0.03 from literature
+aMinus = 0.1 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
+wMax = 0.6#1 #1 # G: 0.15 1
+wMaxInit = 0.4#0.5#0.1#0.100
+wMin = 0
+nbIter = 5
+testWeightFactor = 1#0.05177
+x = 3 # no supervision for x first traj presentations
+y = 0# for inside testing of traj to see if it has been learned /!\ stdp not disabled
+
+input_len=32#y 30
+input_class=32#x 3
+input_size=input_len*input_class
+output_size=9
+inhibWeight = -1
+stimWeight = 20
+
+15 do not use
+
+#trylabel=53
+trylabel=15
+#def parameters
+__delay__ = 1#0.250 # (ms) 
+tauPlus = 150#25 #20 # 15 # 16.8 from literature
+tauMinus = 1000# #20 # 30 # 33.7 from literature
+aPlus = 0.1 #tum 0.016 #9 #3 #0.5 # 0.03 from literature
+aMinus = 0.1 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
+wMax = 0.4#1 #1 # G: 0.15 1
+wMaxInit = 0.15#0.5#0.1#0.100
+wMin = 0
+nbIter = 5
+testWeightFactor = 1#0.05177
+x = 3 # no supervision for x first traj presentations
+y = 0# for inside testing of traj to see if it has been learned /!\ stdp not disabled
+
+input_len=32#y 30
+input_class=32#x 3
+input_size=input_len*input_class
+output_size=9
+inhibWeight = -0.1
+
+
+cell_params_lif = {'cm': 1,#70
+                   'i_offset': 0.0,
+                   'tau_m': 200.0,#20
+                   'tau_refrac': 150.0,#2 more that t inhibit#10
+                   'tau_syn_E': 2.0,#2
+                   'tau_syn_I': 100.0,#5
+                   'v_reset': -70.0,
+                   'v_rest': -65.0,
+                   'v_thresh': -55.0
+                   }
+
 
 
 
