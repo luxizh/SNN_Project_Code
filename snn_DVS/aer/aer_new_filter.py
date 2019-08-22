@@ -235,7 +235,7 @@ class aedatObj(object):
     # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     #                           DATA PRE-PROCESSING
     # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    def simple_process(self,new_dim=(32,32),pos_red=4,time_red=1000,th=7):
+    def simple_process(self,new_dim=(32,32),pos_red=4,time_red=1000,th=5):
         assert self.dim[0]%new_dim[0] is 0
         assert self.dim[1]%new_dim[1] is 0
 

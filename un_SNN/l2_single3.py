@@ -261,7 +261,7 @@ def test(spikeTimes,trained_weights):
     pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0, runTime+100),xlabel='(c) Membrane Potential of Output Layer\nTime (ms)'),
     title='Three lanes Test'#,
     #annotations='T'
-                ).save('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_test13.png')
+                ).save('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_test.png')
     #f1.fig.texts=[]
     print("Weights:{}".format(prepost_proj.get('weight', 'list')))
 
@@ -371,6 +371,12 @@ testspikes=cPickle.load(in_f)
 in_f.close()
 
 weight_list=np.load("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy")
-test(testspikes,weight_list)
+spikes=test(testspikes,weight_list)
+
+count=[]
+for neu in spikes:
+    pass
+    count.append(neu.shape[0])
+print count
 
 

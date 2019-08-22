@@ -136,6 +136,20 @@ cell_params_lif = {'cm': 1,#70
 
 
 
+real
+th=5
+10 init 0.5
+11 init 0.4
+12 1 0.3
+13 50 0.7 0.3
+14 15 
+45 0.7 0.3
+16
+t re 40
+t in 20
+muldependence
+1.5 0.35
+17
 
 
 

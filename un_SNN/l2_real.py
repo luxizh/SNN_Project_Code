@@ -11,15 +11,15 @@ sys.path.append("/Users/luxi/Desktop/ic/project/SNN_DVS_un/SNN_Project_Code/snn_
 from aer_new_filter import aedatObj
 
 #trylabel=53
-trylabel=16
+trylabel=19
 #def parameters
 __delay__ = 1#0.250 # (ms) 
 tauPlus = 40#25 #20 # 15 # 16.8 from literature
 tauMinus = 20# #20 # 30 # 33.7 from literature
 aPlus = 0.1 #tum 0.016 #9 #3 #0.5 # 0.03 from literature
 aMinus = 0.05 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
-wMax = 0.6#1 #1 # G: 0.15 1
-wMaxInit = 0.35#0.5#0.1#0.100
+wMax = 1.5#1 #1 # G: 0.15 1
+wMaxInit = 0.3#0.5#0.1#0.100
 wMin = 0
 nbIter = 5
 testWeightFactor = 1#0.05177
@@ -36,9 +36,9 @@ inhibWeight = -0.3
 cell_params_lif = {'cm': 1,#70
                    'i_offset': 0.0,
                    'tau_m': 20.0,#20
-                   'tau_refrac': 20.0,#2 more that t inhibit#10
+                   'tau_refrac': 40.0,#2 more that t inhibit#10
                    'tau_syn_E': 2.0,#2
-                   'tau_syn_I': 10.0,#5
+                   'tau_syn_I': 20.0,#5
                    'v_reset': -70.0,
                    'v_rest': -65.0,
                    'v_thresh': -55.0
@@ -146,8 +146,9 @@ def train(spikeTimes,untrained_weights=None):
                             #weight=0.02,  # this is the initial value of the weight
                             #delay="0.2 + 0.01*d",
                             timing_dependence=sim.SpikePairRule(tau_plus=tauPlus, tau_minus=tauMinus,A_plus=aPlus, A_minus=aMinus),
-                            #weight_dependence=sim.MultiplicativeWeightDependence(w_min=wMin, w_max=wMax),
-                            weight_dependence=sim.AdditiveWeightDependence(w_min=wMin, w_max=wMax),
+                            weight_dependence=sim.MultiplicativeWeightDependence(w_min=wMin, w_max=wMax),
+                            #weight_dependence=sim.AdditiveWeightDependence(w_min=wMin, w_max=wMax),
+                            #weight_dependence=sim.GutigWeightDependence(w_min=wMin, w_max=wMax, mu_plus=0.5, mu_minus=0.5),
                             #weight_dependence=sim.AdditiveWeightDependence(w_min=0, w_max=0.4),
                             dendritic_delay_fraction=1.0)
     #def projections
@@ -183,9 +184,9 @@ def train(spikeTimes,untrained_weights=None):
     #pplt.Panel(spikestim, xticks=True, yticks=True, markersize=2, xlim=(0,runTime),xlabel='(c) Spikes of Supervised Layer'),
     pplt.Panel(spikes, xticks=True, xlabel="(b) Spikes of Output Layer", yticks=True, markersize=2, xlim=(0,runTime)),
     pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0,runTime),xlabel='(c) Membrane Potential of Output Layer\nTime (ms)'),
-    title="Three lanes Training",
-    annotations="Three lanes Training"
-                ).save('SNN_DVS_un/plot_for_sp/'+str(trylabel)+'_training.png')
+    title="Real Condition Training",
+    annotations="Real Condition Training"
+                ).save('SNN_DVS_un/plot_for_real/'+str(trylabel)+'_training.png')
     #plt.hist(weight_list[1], bins=100)
     
     plt.close('all')
@@ -227,13 +228,13 @@ def test(spikeTimes,trained_weights):
     #k = 0
     for n_pre in range(input_size): # len(untrained_weights) = input_size
         for n_post in range(output_size): # len(untrained_weight[0]) = output_size; 0 or any n_pre
-            connections.append((n_pre, n_post, weigths[n_pre][n_post]*(wMax), __delay__))
+            connections.append((n_pre, n_post, weigths[n_pre][n_post], __delay__))
             #connections.append((n_pre, n_post, weigths[n_pre][n_post]*(wMax)/max(trained_weights), __delay__)) 
             #connections.append((n_pre, n_post, weigths[n_pre][n_post]*(1)/max(trained_weights), __delay__))#
             #k += 1
-
+    inhibWeight = -0.2
     prepost_proj = sim.Projection(pre_pop, post_pop, sim.FromListConnector(connections), synapse_type=sim.StaticSynapse(), receptor_type='excitatory') # no more learning !!
-    #inhib_proj = sim.Projection(post_pop, post_pop, sim.AllToAllConnector(), synapse_type=sim.StaticSynapse(weight=inhibWeight, delay=__delay__), receptor_type='inhibitory')
+    inhib_proj = sim.Projection(post_pop, post_pop, sim.AllToAllConnector(), synapse_type=sim.StaticSynapse(weight=inhibWeight, delay=__delay__), receptor_type='inhibitory')
     # no more lateral inhib
     pre_pop.record(['spikes'])
     post_pop.record(['v', 'spikes'])
@@ -252,9 +253,9 @@ def test(spikeTimes,trained_weights):
     pplt.Panel(spikesinput,xticks=True, yticks=True, markersize=2, xlim=(0,runTime),xlabel='(a) Spikes of Input Layer'),
     pplt.Panel(spikes, xlabel="(b) Spikes of Output Layer", xticks=True, yticks=True, markersize=2, xlim=(0, runTime+100)),
     pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0, runTime+100),xlabel='(c) Membrane Potential of Output Layer\nTime (ms)'),
-    title='Three lanes Test'#,
+    title='Real Condition Test'#,
     #annotations='T'
-                ).save('SNN_DVS_un/plot_for_sp/'+str(trylabel)+'_test.png')
+                ).save('SNN_DVS_un/plot_for_real/'+str(trylabel)+'_test7.png')
     #f1.fig.texts=[]
     print("Weights:{}".format(prepost_proj.get('weight', 'list')))
 
@@ -278,15 +279,11 @@ def plot_weight_reconstruction(neuron_index,weight):
     ax.set_xticklabels(xLabel)
     '''
     #weight=weight.reshape()
-    #作图并选择热图的颜色填充风格，这里选择hot
     im = ax.imshow(weight, cmap=plt.cm.gray_r,origin='lower')
-    #增加右侧的颜色刻度条
     plt.colorbar(im)
-    #增加标题
     plt.title("reconstrucion of neuron"+str(neuron_index))
-    #show
-    
-    plt.savefig('SNN_DVS_un/plot_for_sp'+str(trylabel)+'_neuron.png')
+    #show   
+    plt.savefig('SNN_DVS_un/plot_for_real'+str(trylabel)+'_neuron.png')
     plt.show()
     plt.close('all')
     pass
@@ -311,7 +308,7 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
         im = ax[i].imshow(weight[:,i].reshape((input_len,-1),order='F'), cmap=plt.cm.gray,vmax=wMax,vmin=wMaxInit-0.1,origin='lower')
     fig.colorbar(im,ax=ax[:])
     fig.suptitle('Reconstrucions',fontweight='bold')
-    fig.savefig('SNN_DVS_un/plot_for_sp/'+str(trylabel)+'_neurons.png')
+    fig.savefig('SNN_DVS_un/plot_for_real/'+str(trylabel)+'_neurons.png')
     plt.show()
     plt.close('all')
     return fig 
@@ -319,9 +316,9 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
 
 
 #==============main================
-
+'''
 readfold='SNN_DVS_un/aer_recored/record_8_18/'
-AerRaw=aedatObj(filename="real3.aedat")
+AerRaw=aedatObj(filename="real4.aedat")
 #AerRAW.save_to_mat()
 #AerRaw.save_object()
 AerSp,spikes=AerRaw.simple_process(time_red=1000)
@@ -333,20 +330,21 @@ output=open(savefold+AerSp.filename+'_spikes.pkl','wb')
 cPickle.dump(spikes,output,-1)
 #sio.savemat(savefold+AerSp.filename+'_spikes', {'spikes': spikes})
 output.close()
+'''
 
 '''
 
 loadfold='SNN_DVS_un/aerobj/'
-in_f=open(loadfold+'sp_20_sp_32_spikes.pkl','rb')
+in_f=open(loadfold+'real6_sp_32_spikes.pkl','rb')
 spikes=cPickle.load(in_f)
 in_f.close()
 
 
 weight_list=None
 weight_list=train(spikeTimes=spikes,untrained_weights=weight_list)
-np.save("SNN_DVS_un/weight/l2_weight_sp/"+str(trylabel)+".npy",weight_list)
+np.save("SNN_DVS_un/weight/l2_weight_real/"+str(trylabel)+".npy",weight_list)
 
-weight_list=np.load("SNN_DVS_un/weight/l2_weight_sp/"+str(trylabel)+".npy")
+weight_list=np.load("SNN_DVS_un/weight/l2_weight_real/"+str(trylabel)+".npy")
 neuron_ind=4
 twMax=max(weight_list)
 weight_re=weight_list.reshape(input_size,-1)
@@ -358,18 +356,18 @@ plot_all_weight_reconstructions(weight_re,output_size,input_len,input_class,twMa
 #np.save("class_result/noiseweight"+str(trylabel)+".npy",weight_list)
 
 
-'''
+
 '''
 loadfold='SNN_DVS_un/aerobj/'
-in_f=open(loadfold+'sp_22_sp_32_spikes.pkl','rb')
+in_f=open(loadfold+'real7_sp_32_spikes.pkl','rb')
 testspikes=cPickle.load(in_f)
 in_f.close()
 
-weight_list=np.load("SNN_DVS_un/weight/l2_weight_sp/"+str(trylabel)+".npy")
+weight_list=np.load("SNN_DVS_un/weight/l2_weight_real/"+str(trylabel)+".npy")
 spikes=test(testspikes,weight_list)
 count=[]
 for neu in spikes:
     pass
     count.append(neu.shape[0])
 print count
-'''
+
