@@ -232,7 +232,7 @@ def test(spikeTimes,trained_weights):
             #connections.append((n_pre, n_post, weigths[n_pre][n_post]*(wMax)/max(trained_weights), __delay__)) 
             #connections.append((n_pre, n_post, weigths[n_pre][n_post]*(1)/max(trained_weights), __delay__))#
             #k += 1
-    inhibWeight = -0.2
+    inhibWeight = -0.3
     prepost_proj = sim.Projection(pre_pop, post_pop, sim.FromListConnector(connections), synapse_type=sim.StaticSynapse(), receptor_type='excitatory') # no more learning !!
     inhib_proj = sim.Projection(post_pop, post_pop, sim.AllToAllConnector(), synapse_type=sim.StaticSynapse(weight=inhibWeight, delay=__delay__), receptor_type='inhibitory')
     # no more lateral inhib
@@ -255,7 +255,7 @@ def test(spikeTimes,trained_weights):
     pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0, runTime+100),xlabel='(c) Membrane Potential of Output Layer\nTime (ms)'),
     title='Real Condition Test'#,
     #annotations='T'
-                ).save('SNN_DVS_un/plot_for_real/'+str(trylabel)+'_test7.png')
+                ).save('SNN_DVS_un/plot_for_real/'+str(trylabel)+'_test1.png')
     #f1.fig.texts=[]
     print("Weights:{}".format(prepost_proj.get('weight', 'list')))
 

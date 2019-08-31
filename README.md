@@ -48,6 +48,7 @@ wMaxInit = 0.08
 tauPlus = 30
 75
 0.24 0.12
+0.4 0.08
 inhi -1
 
  cancel inhibtory at test max 1.0
@@ -65,6 +66,24 @@ wMax = 0.4
 wMaxInit = 0.08
 wMin = 0
 inhibWeight = -1
+
+trylabel=76
+#def parameters
+__delay__ = 1#0.250 # (ms) 
+tauPlus = 40#25 #20 # 15 # 16.8 from literature
+tauMinus = 20# #20 # 30 # 33.7 from literature
+aPlus = 0.024  #tum 0.016 #9 #3 #0.5 # 0.03 from literature
+aMinus = 0.012 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
+wMax = 0.36#1 #1 # G: 0.15 1
+wMaxInit = 0.065#0.5#0.1#0.100
+wMin = 0
+nbIter = 5
+testWeightFactor = 1#0.05177
+x = 3 # no supervision for x first traj presentations
+y = 0# for inside testing of traj to see if it has been learned /!\ stdp not disabled
+
+
+
 
 11
 0.6 0.3

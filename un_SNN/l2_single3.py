@@ -9,17 +9,18 @@ import cPickle
 import sys
 sys.path.append("/Users/luxi/Desktop/ic/project/SNN_DVS_un/SNN_Project_Code/snn_DVS/aer")
 from aer_new_filter import aedatObj
+#import scipy.io as sio
 
 #trylabel=53
-trylabel=75
+trylabel=77
 #def parameters
 __delay__ = 1#0.250 # (ms) 
 tauPlus = 40#25 #20 # 15 # 16.8 from literature
 tauMinus = 20# #20 # 30 # 33.7 from literature
 aPlus = 0.024  #tum 0.016 #9 #3 #0.5 # 0.03 from literature
 aMinus = 0.012 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
-wMax = 0.4#1 #1 # G: 0.15 1
-wMaxInit = 0.08#0.5#0.1#0.100
+wMax = 0.36#1 #1 # G: 0.15 1
+wMaxInit = 0.065#0.5#0.1#0.100
 wMin = 0
 nbIter = 5
 testWeightFactor = 1#0.05177
@@ -261,7 +262,7 @@ def test(spikeTimes,trained_weights):
     pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0, runTime+100),xlabel='(c) Membrane Potential of Output Layer\nTime (ms)'),
     title='Three lanes Test'#,
     #annotations='T'
-                ).save('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_test.png')
+                ).save('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_test_m1.png')
     #f1.fig.texts=[]
     print("Weights:{}".format(prepost_proj.get('weight', 'list')))
 
@@ -328,7 +329,7 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
 #==============main================
 '''
 readfold='SNN_DVS_un/aer_recored/record_8_18/'
-AerRaw=aedatObj(filename="single3_26.aedat")
+AerRaw=aedatObj(filename="mul3_23.aedat")
 #AerRAW.save_to_mat()
 #AerRaw.save_object()
 AerSp,spikes=AerRaw.simple_process(time_red=1000)
@@ -340,13 +341,14 @@ output=open(savefold+AerSp.filename+'_spikes.pkl','wb')
 cPickle.dump(spikes,output,-1)
 #sio.savemat(savefold+AerSp.filename+'_spikes', {'spikes': spikes})
 output.close()
-'''
+
 
 '''
 loadfold='SNN_DVS_un/aerobj/'
 in_f=open(loadfold+'single3_20_sp_32_spikes.pkl','rb')
 spikes=cPickle.load(in_f)
 in_f.close()
+#sio.savemat('SNN_DVS_un/aermat/'+'single3_20_sp_32_spikes', {'spikes': spikes})
 
 
 weight_list=None
@@ -366,7 +368,7 @@ plot_all_weight_reconstructions(weight_re,output_size,input_len,input_class,wMax
 '''
 
 loadfold='SNN_DVS_un/aerobj/'
-in_f=open(loadfold+'single3_26_sp_32_spikes.pkl','rb')
+in_f=open(loadfold+'mul3_23_sp_32_spikes.pkl','rb')
 testspikes=cPickle.load(in_f)
 in_f.close()
 
@@ -378,5 +380,5 @@ for neu in spikes:
     pass
     count.append(neu.shape[0])
 print count
-
+'''
 
