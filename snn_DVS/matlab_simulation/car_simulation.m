@@ -6,8 +6,8 @@ menu = uimenu(f,'Label','Start simulation');
 stop=uimenu(f,'Label','Stop','Callback',{@stop_func},... 
            'Separator','on','Accelerator','X');
 %stop.Accelerator = '4';
-quit=uimenu(f,'Label','Quit','Callback',{@exit_func},... 
-           'Separator','on','Accelerator','Q');
+%quit=uimenu(f,'Label','Quit','Callback',{@exit_func},... 
+%           'Separator','on','Accelerator','Q');
 %arrows=uimenu(menu,'Label','Arrows', 'Callback',{@arrow_func, stop}); 
 box=uimenu(menu,'Label','three_lanes up', 'Callback',{@three_up,stop});
 box.Accelerator = '0';

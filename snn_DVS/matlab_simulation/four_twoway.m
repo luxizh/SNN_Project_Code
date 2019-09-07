@@ -17,7 +17,7 @@ function four_twoway(src, evt, stop)
         else
             box=patch([X+5 X+25 X+25 X+5], [0 0 -30 -30], 'w');
             for y=0:4:150
-                set(box,'YData',[y y y+30 y+30]);
+                set(box,'YData',[y y y-30 y-30]);
                 pause(0.015);
             end            
         end

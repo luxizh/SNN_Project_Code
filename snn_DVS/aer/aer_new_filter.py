@@ -10,7 +10,7 @@ import cPickle
 
 #/Users/luxi/Desktop/ic/project/SNN_DVS_un/aer_recored
 readfold='SNN_DVS_un/aer_recored/'#Mul6_8_2/'
-readfold='SNN_DVS_un/aer_recored/record_8_18/'
+readfold='SNN_DVS_un/aer_recored/record_8_23/'
 #savefold='SNN_DVS_un/aermat/'
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #
@@ -235,7 +235,7 @@ class aedatObj(object):
     # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     #                           DATA PRE-PROCESSING
     # ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    def simple_process(self,new_dim=(32,32),pos_red=4,time_red=1000,th=6):
+    def simple_process(self,new_dim=(32,32),pos_red=4,time_red=1000,th=8):
         assert self.dim[0]%new_dim[0] is 0
         assert self.dim[1]%new_dim[1] is 0
 

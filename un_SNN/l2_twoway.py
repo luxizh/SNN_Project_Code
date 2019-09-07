@@ -9,18 +9,19 @@ import cPickle
 import sys
 sys.path.append("/Users/luxi/Desktop/ic/project/SNN_DVS_un/SNN_Project_Code/snn_DVS/aer")
 from aer_new_filter import aedatObj
-#import scipy.io as sio
 
 #trylabel=53
-trylabel=75
+trylabel=15
+#def parameters
+#trylabel=53
 #def parameters
 __delay__ = 1#0.250 # (ms) 
 tauPlus = 40#25 #20 # 15 # 16.8 from literature
 tauMinus = 20# #20 # 30 # 33.7 from literature
-aPlus = 0.024  #tum 0.016 #9 #3 #0.5 # 0.03 from literature
-aMinus = 0.012 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
-wMax = 0.36#1 #1 # G: 0.15 1
-wMaxInit = 0.065#0.5#0.1#0.100
+aPlus = 0.04 #tum 0.016 #9 #3 #0.5 # 0.03 from literature
+aMinus = 0.02 #255 #tum 0.012 #2.55 #2.55 #05 #0.5 # 0.0255 (=0.03*0.85) from literature 
+wMax = 0.24#1 #1 # G: 0.15 1
+wMaxInit = 0.12#0.5#0.1#0.100
 wMin = 0
 nbIter = 5
 testWeightFactor = 1#0.05177
@@ -30,21 +31,19 @@ y = 0# for inside testing of traj to see if it has been learned /!\ stdp not dis
 input_len=32#y 30
 input_class=32#x 3
 input_size=input_len*input_class
-output_size=9
-inhibWeight = -1
-stimWeight = 20
+output_size=16
+inhibWeight = -0.3
 
-v_co=1
 
 cell_params_lif = {'cm': 1,#70
                    'i_offset': 0.0,
                    'tau_m': 20.0,#20
-                   'tau_refrac': 20.0,#2 more that t inhibit#10
+                   'tau_refrac': 500.0,#2 more that t inhibit#10
                    'tau_syn_E': 2.0,#2
                    'tau_syn_I': 10.0,#5
                    'v_reset': -70.0,
                    'v_rest': -65.0,
-                   'v_thresh': -50.0
+                   'v_thresh': -55.0
                    }
 
 def generate_data():
@@ -105,11 +104,7 @@ def train(spikeTimes,untrained_weights=None):
     labelSpikes = []
     #spikeTimes = generate_data()
 
-    for i in range(output_size):
-        labelSpikes.append([])
-        labelSpikes[i] = [i*input_len*v_co*5+(input_len-1)*v_co+1,
-                            i*input_len*v_co*5+(input_len-1)*v_co*2+1,
-                            i*input_len*v_co*5+(input_len-1)*v_co*3+1]
+
         #for j in range(5):
         #    labelSpikes
         
@@ -134,12 +129,12 @@ def train(spikeTimes,untrained_weights=None):
                 k += 1
     else:
         training_weights = untrained_weights
-    #return training_weights
+
     connections = []
     for n_pre in range(input_size): # len(untrained_weights) = input_size
         for n_post in range(output_size): # len(untrained_weight[0]) = output_size; 0 or any n_pre
             connections.append((n_pre, n_post, training_weights[n_pre][n_post], __delay__)) #index
-    runTime = int(max(max(spikeTimes)))+100
+    runTime = int(max(max(spikeTimes))/3)+100
     #####################
     sim.setup(timestep=1)
     #def populations
@@ -148,7 +143,6 @@ def train(spikeTimes,untrained_weights=None):
     #supsignal=sim.Population(output_size,sim.SpikeSourceArray, {'spike_times': labelSpikes},label='supersignal')
 
     #def learning rule
-    
     stdp = sim.STDPMechanism(
                             weight=untrained_weights,
                             #weight=0.02,  # this is the initial value of the weight
@@ -161,8 +155,7 @@ def train(spikeTimes,untrained_weights=None):
     #def projections
 
     #stdp_proj = sim.Projection(layer1, layer2, sim.FromListConnector(connections), synapse_type=stdp)
-    #stdp_proj = sim.Projection(layer1, layer2, sim.AllToAllConnector(), synapse_type=stdp)
-    stdp_proj = sim.Projection(layer1, layer2, sim.AllToAllConnector(), synapse_type=sim.StaticSynapse(weight=untrained_weights, delay=__delay__))
+    stdp_proj = sim.Projection(layer1, layer2, sim.AllToAllConnector(), synapse_type=stdp)
     inhibitory_connections = sim.Projection(layer2, layer2, sim.AllToAllConnector(allow_self_connections=False), 
                                             synapse_type=sim.StaticSynapse(weight=inhibWeight, delay=__delay__), 
                                             receptor_type='inhibitory')
@@ -192,9 +185,9 @@ def train(spikeTimes,untrained_weights=None):
     #pplt.Panel(spikestim, xticks=True, yticks=True, markersize=2, xlim=(0,runTime),xlabel='(c) Spikes of Supervised Layer'),
     pplt.Panel(spikes, xticks=True, xlabel="(b) Spikes of Output Layer", yticks=True, markersize=2, xlim=(0,runTime)),
     pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0,runTime),xlabel='(c) Membrane Potential of Output Layer\nTime (ms)'),
-    title="Three lanes Training",
-    annotations="Three lanes Training"
-                ).save('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_training.png')
+    title="Two Training",
+    annotations="Twoway Training"
+                ).save('SNN_DVS_un/plot_for_twoway/'+str(trylabel)+'_training.png')
     #plt.hist(weight_list[1], bins=100)
     
     plt.close('all')
@@ -237,12 +230,13 @@ def test(spikeTimes,trained_weights):
     for n_pre in range(input_size): # len(untrained_weights) = input_size
         for n_post in range(output_size): # len(untrained_weight[0]) = output_size; 0 or any n_pre
             #connections.append((n_pre, n_post, weigths[n_pre][n_post]*(wMax), __delay__))
-            #connections.append((n_pre, n_post, weigths[n_pre][n_post]*(wMax)/max(trained_weights), __delay__)) 
-            connections.append((n_pre, n_post, min(weigths[n_pre][n_post]*(1.05)/max(trained_weights),0.88), __delay__))#
-            #connections.append((n_pre, n_post, weigths[n_pre][n_post], __delay__))
+            connections.append((n_pre, n_post, weigths[n_pre][n_post]*(wMax)/max(trained_weights), __delay__)) 
+            #connections.append((n_pre, n_post, min(weigths[n_pre][n_post],0.2), __delay__)) 
+            #connections.append((n_pre, n_post, weigths[n_pre][n_post]*(1)/max(trained_weights), __delay__))#
             #k += 1
+
     prepost_proj = sim.Projection(pre_pop, post_pop, sim.FromListConnector(connections), synapse_type=sim.StaticSynapse(), receptor_type='excitatory') # no more learning !!
-    #inhib_proj = sim.Projection(post_pop, post_pop, sim.AllToAllConnector(), synapse_type=sim.StaticSynapse(weight=inhibWeight, delay=__delay__), receptor_type='inhibitory')
+    inhib_proj = sim.Projection(post_pop, post_pop, sim.AllToAllConnector(), synapse_type=sim.StaticSynapse(weight=inhibWeight, delay=__delay__), receptor_type='inhibitory')
     # no more lateral inhib
     pre_pop.record(['spikes'])
     post_pop.record(['v', 'spikes'])
@@ -253,7 +247,6 @@ def test(spikeTimes,trained_weights):
     v = neo.segments[0].filter(name='v')[0]
     neoinput= pre_pop.get_data(["spikes"])
     spikesinput = neoinput.segments[0].spiketrains
-    
     plt.close('all')
     pplt.Figure(
     # plot voltage 
@@ -262,9 +255,9 @@ def test(spikeTimes,trained_weights):
     pplt.Panel(spikesinput,xticks=True, yticks=True, markersize=2, xlim=(0,runTime),xlabel='(a) Spikes of Input Layer'),
     pplt.Panel(spikes, xlabel="(b) Spikes of Output Layer", xticks=True, yticks=True, markersize=2, xlim=(0, runTime+100)),
     pplt.Panel(v, ylabel="Membrane potential (mV)", xticks=True, yticks=True, xlim=(0, runTime+100),xlabel='(c) Membrane Potential of Output Layer\nTime (ms)'),
-    title='Three lanes Test'#,
+    title='Twoway Test'#,
     #annotations='T'
-                ).save('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_test_m3.png')
+                ).save('SNN_DVS_un/plot_for_twoway/'+str(trylabel)+'_test2.png')
     #f1.fig.texts=[]
     print("Weights:{}".format(prepost_proj.get('weight', 'list')))
 
@@ -296,7 +289,7 @@ def plot_weight_reconstruction(neuron_index,weight):
     plt.title("reconstrucion of neuron"+str(neuron_index))
     #show
     
-    plt.savefig('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_neuron.png')
+    plt.savefig('SNN_DVS_un/plot_for_twoway'+str(trylabel)+'_neuron.png')
     plt.show()
     plt.close('all')
     pass
@@ -318,10 +311,10 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
         ax[i].set_yticks(range(0,input_len,input_len-1))
         ax[i].set_xticks(range(0,input_class,input_class-1))
         ax[i].tick_params(labelsize=8)
-        im = ax[i].imshow(weight[:,i].reshape((input_len,-1),order='F'), cmap=plt.cm.gray,vmax=wMax,origin='lower')
+        im = ax[i].imshow(weight[:,i].reshape((input_len,-1),order='F'), cmap=plt.cm.gray,vmax=wMax,vmin=wMaxInit*0.5,origin='lower')
     fig.colorbar(im,ax=ax[:])
     fig.suptitle('Reconstrucions',fontweight='bold')
-    fig.savefig('SNN_DVS_un/plot_for_single3_/'+str(trylabel)+'_neurons.png')
+    fig.savefig('SNN_DVS_un/plot_for_twoway/'+str(trylabel)+'_neurons.png')
     plt.show()
     plt.close('all')
     return fig 
@@ -330,8 +323,8 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
 
 #==============main================
 '''
-readfold='SNN_DVS_un/aer_recored/record_8_18/'
-AerRaw=aedatObj(filename="mul3_23.aedat")
+readfold='SNN_DVS_un/aer_recored/record_8_23/'
+AerRaw=aedatObj(filename="twoway32.aedat")
 #AerRAW.save_to_mat()
 #AerRaw.save_object()
 AerSp,spikes=AerRaw.simple_process(time_red=1000)
@@ -343,46 +336,45 @@ output=open(savefold+AerSp.filename+'_spikes.pkl','wb')
 cPickle.dump(spikes,output,-1)
 #sio.savemat(savefold+AerSp.filename+'_spikes', {'spikes': spikes})
 output.close()
-
-
-
 '''
-'''
+
+
 loadfold='SNN_DVS_un/aerobj/'
-in_f=open(loadfold+'single3_20_sp_32_spikes.pkl','rb')
+in_f=open(loadfold+'twoway30_sp_32_spikes.pkl','rb')
 spikes=cPickle.load(in_f)
 in_f.close()
-#sio.savemat('SNN_DVS_un/aermat/'+'single3_20_sp_32_spikes', {'spikes': spikes})
 
 
 weight_list=None
 weight_list=train(spikeTimes=spikes,untrained_weights=weight_list)
-np.save("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy",weight_list)
+np.save("SNN_DVS_un/weight/l2_weight_twoway/"+str(trylabel)+".npy",weight_list)
 
-weight_list=np.load("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy")
+weight_list=np.load("SNN_DVS_un/weight/l2_weight_twoway/"+str(trylabel)+".npy")
 neuron_ind=4
+twMax=max(weight_list)
 weight_re=weight_list.reshape(input_size,-1)
 #plot_weight_reconstruction(neuron_ind,(weight_re[:,neuron_ind]).reshape((input_len,-1),order='F'))
-twMax=max(weight_list)
 plot_all_weight_reconstructions(weight_re,output_size,input_len,input_class,twMax)
 #for i in range(10):
 #    spikeTimes=generate_data(1)
 
 #np.save("class_result/noiseweight"+str(trylabel)+".npy",weight_list)
+
+
+
+
 '''
-
-
 loadfold='SNN_DVS_un/aerobj/'
-in_f=open(loadfold+'mul3_23_sp_32_spikes.pkl','rb')
+in_f=open(loadfold+'twoway32_sp_32_spikes.pkl','rb')
 testspikes=cPickle.load(in_f)
 in_f.close()
 
-weight_list=np.load("SNN_DVS_un/weight/l2_weight/"+str(trylabel)+".npy")
+weight_list=np.load("SNN_DVS_un/weight/l2_weight_twoway/"+str(trylabel)+".npy")
 spikes=test(testspikes,weight_list)
-
 count=[]
 for neu in spikes:
     pass
     count.append(neu.shape[0])
 print count
+'''
 

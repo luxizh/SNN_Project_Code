@@ -151,7 +151,7 @@ cell_params_lif = {'cm': 1,#70
                    'v_rest': -65.0,
                    'v_thresh': -55.0
                    }
-
+16
 
 
 
@@ -170,7 +170,39 @@ muldependence
 1.5 0.35
 17
 
+20190823 record AER data 
+20-22 two way
+24 four lanes
+25 three lanes clear?
 
+
+twoway
+th=9
+0.36 0.12
+2
+th=8
+0.36 0.12
+3
+th=7
+0.11
+
+6
+th=7
+0.36 0.12
+55
+7
+th=7
+0.1 0.05
+0.36 0.12
+52.5
+8
+0.04 0.02
+0.24 0.12
+52.5
+9
+th=8
+10
+55
 
 2019-08-12 18:02:21 WARNING: The delays in the connector AllToAllConnector from outputspikes to outputspikes was clipped to 1.0 a total of 72 times.  This can be avoided by reducing the timestep or increasing the minimum delay to one timestep
 2019-08-12 18:02:21 WARNING: No multicast packets were sent by supersignal:0:8.  If you expected packets to be sent this could indicate an error

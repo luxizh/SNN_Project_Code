@@ -11,7 +11,7 @@ sys.path.append("/Users/luxi/Desktop/ic/project/SNN_DVS_un/SNN_Project_Code/snn_
 from aer_new_filter import aedatObj
 
 #trylabel=53
-trylabel=19
+trylabel=30
 #def parameters
 __delay__ = 1#0.250 # (ms) 
 tauPlus = 40#25 #20 # 15 # 16.8 from literature
@@ -317,8 +317,8 @@ def plot_all_weight_reconstructions(weight,neurons,input_len,input_class,wMax):
 
 #==============main================
 '''
-readfold='SNN_DVS_un/aer_recored/record_8_18/'
-AerRaw=aedatObj(filename="real4.aedat")
+readfold='SNN_DVS_un/aer_recored/record_8_23/'
+AerRaw=aedatObj(filename="real25.aedat")
 #AerRAW.save_to_mat()
 #AerRaw.save_object()
 AerSp,spikes=AerRaw.simple_process(time_red=1000)
@@ -332,10 +332,10 @@ cPickle.dump(spikes,output,-1)
 output.close()
 '''
 
-'''
+
 
 loadfold='SNN_DVS_un/aerobj/'
-in_f=open(loadfold+'real6_sp_32_spikes.pkl','rb')
+in_f=open(loadfold+'real25_sp_32_spikes.pkl','rb')
 spikes=cPickle.load(in_f)
 in_f.close()
 
